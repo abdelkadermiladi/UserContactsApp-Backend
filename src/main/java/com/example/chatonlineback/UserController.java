@@ -18,8 +18,8 @@ public class UserController {
     public UserController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-    @CrossOrigin(origins = "http://localhost:4200")
 
+    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/users")
     public ResponseEntity<List<User>> findAllUsers() {
         List<User> users = userRepository.findAll();
@@ -27,20 +27,21 @@ public class UserController {
         for(int i=0;i<users.size();i++){
             System.out.println(users.get(i).getUsername());
             System.out.println(users.get(i).getPassword());
+            System.out.println(users.get(i).getPhoneNumber());
+            System.out.println(users.get(i).getEmail());
         }
         System.out.println("end");
 
         return ResponseEntity.ok(users);
     }
     @CrossOrigin(origins = "http://localhost:4200")
-
     @GetMapping("/users/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
 
         User user = userRepository.findByUsername(username);
 
         if (user != null) {
-            System.out.println(user.getGender());
+            System.out.println(user.getPhoneNumber()+"*************************************");
             return ResponseEntity.ok(user);
         } else {
             // User not found

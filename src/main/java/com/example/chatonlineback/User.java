@@ -13,6 +13,8 @@ public class User {
     private Integer age;
     private String gender;
 
+    private Integer phoneNumber;
+    private String email;
 
     public String getUsername() {
         return username;
@@ -44,5 +46,21 @@ public class User {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public Integer getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(Integer phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
