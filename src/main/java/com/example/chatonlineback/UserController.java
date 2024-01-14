@@ -1,6 +1,7 @@
 package com.example.chatonlineback;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,25 +14,21 @@ import java.util.Map;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final EmailService emailService;
+
 
     @Autowired
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository,EmailService emailService) {
         this.userRepository = userRepository;
+        this.emailService  =emailService;
     }
+
+
 
     @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/users")
     public ResponseEntity<List<User>> findAllUsers() {
         List<User> users = userRepository.findAll();
-        System.out.println("start");
-        for(int i=0;i<users.size();i++){
-            System.out.println(users.get(i).getUsername());
-            System.out.println(users.get(i).getPassword());
-            System.out.println(users.get(i).getPhoneNumber());
-            System.out.println(users.get(i).getEmail());
-        }
-        System.out.println("end");
-
         return ResponseEntity.ok(users);
     }
     @CrossOrigin(origins = "http://localhost:4200")
@@ -41,7 +38,6 @@ public class UserController {
         User user = userRepository.findByUsername(username);
 
         if (user != null) {
-            System.out.println(user.getPhoneNumber()+"*************************************");
             return ResponseEntity.ok(user);
         } else {
             // User not found
@@ -60,16 +56,38 @@ public class UserController {
 
         if (user != null && user.getPassword().equals(password)) {
             // Authentication successful
-            System.out.println("Login successful");
             Map<String, String> response = new HashMap<>();
             response.put("message", "Login successful");
             return ResponseEntity.ok(response);
         } else {
             // Authentication failed
-            System.out.println("Login unsuccessful, Invalid credentials");
             Map<String, String> response = new HashMap<>();
             response.put("message", "Invalid credentials");
             return ResponseEntity.status(401).body(response);
+        }
+    }
+
+    @Value("${spring.mail.username}")
+    private String EmailSender;
+    @CrossOrigin(origins = "http://localhost:4200")
+    @PostMapping("/send-email")
+    public ResponseEntity<String> sendEmail(@RequestBody EmailRequest emailRequest) {
+        // Extract recipient, subject, and content from the request
+        String recipientUsername = emailRequest.getRecipientUsername();
+        String subject = emailRequest.getSubject();
+        String content = emailRequest.getContent();
+
+        // Fetch sender and recipient details from the database
+        User recipient = userRepository.findByUsername(recipientUsername);
+
+        if (recipient != null) {
+            // Send email
+            emailService.sendEmail(EmailSender, recipient.getEmail(), subject, content);
+
+            return ResponseEntity.ok("Email sent successfully");
+        } else {
+            // recipient not found
+            return ResponseEntity.status(404).body("Recipient not found");
         }
     }
 
