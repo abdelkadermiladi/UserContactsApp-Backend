@@ -1,6 +1,9 @@
-package com.example.chatonlineback;
+package com.example.chatonlineback.model;
 
 import jakarta.persistence.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -15,6 +18,35 @@ public class User {
 
     private Integer phoneNumber;
     private String email;
+
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_contacts",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "contact_id")
+    )
+
+
+    private Set<Contact> contacts = new HashSet<>();
+
+    public Set<Contact> getContacts() {
+        return contacts;
+    }
+
+    public boolean addContact(Contact contact) {
+        System.out.println("the added contact phone number:");
+        System.out.println(contact.getPhoneNumber());
+        return contacts.add(contact);
+        //contact.setUser(this);
+
+    }
+
+    public void removeContact(Contact contact) {
+        contacts.remove(contact);
+        //contact.setUser(null);
+    }
+
 
     public String getUsername() {
         return username;
