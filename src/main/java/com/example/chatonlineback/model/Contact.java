@@ -37,10 +37,6 @@ public class Contact {
         this.contactname = contactname;
     }
 
-
-    // Constructors, getters, setters, etc.
-
-    // Ensure to generate appropriate getters and setters for the 'contact' field
 }
 
 

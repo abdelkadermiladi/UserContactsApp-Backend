@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
 
 @RestController
 @RequestMapping("/api")
@@ -31,6 +31,7 @@ public class UserController {
         this.authenticatedUser = new AuthenticatedUser(); // Initialize the object
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////
 
     @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/users")
@@ -38,6 +39,8 @@ public class UserController {
         List<User> users = userRepository.findAll();
         return ResponseEntity.ok(users);
     }
+    /////////////////////////////////////////////////////////////////////////////////////
+
     @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/users/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
@@ -51,6 +54,8 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
     }
+    /////////////////////////////////////////////////////////////////////////////////////
+
     @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest loginRequest) {
@@ -64,8 +69,6 @@ public class UserController {
         if (user != null && user.getPassword().equals(password)) {
             // Authentication successful
             authenticatedUser.setAuthenticatedUser(user);
-            System.out.println("...........authenticatedUser's phoneNumber=");
-            System.out.println(authenticatedUser.getAuthenticatedUser().getPhoneNumber());
             Map<String, String> response = new HashMap<>();
             response.put("message", "Login successful");
             return ResponseEntity.ok(response);
@@ -76,6 +79,7 @@ public class UserController {
             return ResponseEntity.status(401).body(response);
         }
     }
+    /////////////////////////////////////////////////////////////////////////////////////
 
     @Value("${spring.mail.username}")
     private String EmailSender;
@@ -101,32 +105,24 @@ public class UserController {
         }
     }
     /////////////////////////////////////////////////////////////////////////////////////
-
+ /*
     @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("/add-contact/{contactname}")
     public ResponseEntity<String> addContact(@PathVariable String contactname) {
         //User currentUser = authenticatedUser.getAuthenticatedUser();
         User currentUser = userRepository.findByUsername("abdelkader");
         Contact contact_to_add = contactRepository.findByContactname(contactname);
-        System.out.println("contact");
-        System.out.println(contact_to_add.getPhoneNumber());
-
 
         if (currentUser != null && contact_to_add != null) {
-            System.out.println("curent user and other user OKKKKK");
             if (currentUser.addContact(contact_to_add)) {
-                System.out.println("YEEEES");
                 userRepository.save(currentUser);
-
                 // Access the set of contacts for the user
                 Set<Contact> userContacts = currentUser.getContacts();
-
                 // Now you can iterate over the set or perform other operations with the contacts
                 for (Contact contact : userContacts) {
                     // Do something with the contact
                     System.out.println("Contact Phone Number: " + contact.getPhoneNumber());
                 }
-
                 // Notify otherUser about the addition (send a notification)
                 return ResponseEntity.ok("Contact added successfully");
             } else {
@@ -136,7 +132,36 @@ public class UserController {
             return ResponseEntity.status(404).body("User not found");
         }
     }
+*/
+    /////////////////////////////////////////////////////////////////////////////////////
 
+    @CrossOrigin(origins = "http://localhost:4200")
+    @PostMapping("/add-contact")
+    public ResponseEntity<Map<String, String>> addContact(@RequestBody Contact contact) {
+        User currentUser = authenticatedUser.getAuthenticatedUser();
 
+        if (currentUser != null && contact != null) {
+            contactRepository.save(contact);
+
+            if (currentUser.addContact(contact)) {
+
+                userRepository.save(currentUser);
+
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Contact added successfully");
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, String> response = new HashMap<>();
+                response.put("error", "Contact already exists");
+
+                return ResponseEntity.status(400).body(response);
+            }
+        } else {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "User not found");
+
+            return ResponseEntity.status(404).body(response);
+        }
+    }
 
 }
