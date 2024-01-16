@@ -5,6 +5,7 @@ import com.example.chatonlineback.repository.ContactRepository;
 import com.example.chatonlineback.service.EmailService;
 
 import com.example.chatonlineback.repository.UserRepository;
+import com.example.chatonlineback.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 @RestController
@@ -22,12 +24,15 @@ public class UserController {
     private final UserRepository userRepository;
     private final ContactRepository contactRepository;
     private final EmailService emailService;
+    private final UserService userService;
     private final AuthenticatedUser authenticatedUser;
     @Autowired
-    public UserController(UserRepository userRepository,ContactRepository contactRepository,EmailService emailService) {
+    public UserController(UserRepository userRepository,ContactRepository contactRepository,
+                          EmailService emailService,UserService userService) {
         this.contactRepository = contactRepository;
         this.userRepository = userRepository;
         this.emailService  =emailService;
+        this.userService  =userService;
         this.authenticatedUser = new AuthenticatedUser(); // Initialize the object
     }
 
@@ -105,63 +110,55 @@ public class UserController {
         }
     }
     /////////////////////////////////////////////////////////////////////////////////////
- /*
-    @CrossOrigin(origins = "http://localhost:4200")
-    @PostMapping("/add-contact/{contactname}")
-    public ResponseEntity<String> addContact(@PathVariable String contactname) {
-        //User currentUser = authenticatedUser.getAuthenticatedUser();
-        User currentUser = userRepository.findByUsername("abdelkader");
-        Contact contact_to_add = contactRepository.findByContactname(contactname);
 
-        if (currentUser != null && contact_to_add != null) {
-            if (currentUser.addContact(contact_to_add)) {
-                userRepository.save(currentUser);
-                // Access the set of contacts for the user
-                Set<Contact> userContacts = currentUser.getContacts();
-                // Now you can iterate over the set or perform other operations with the contacts
-                for (Contact contact : userContacts) {
-                    // Do something with the contact
-                    System.out.println("Contact Phone Number: " + contact.getPhoneNumber());
-                }
-                // Notify otherUser about the addition (send a notification)
-                return ResponseEntity.ok("Contact added successfully");
-            } else {
-                return ResponseEntity.status(400).body("Contact already exists");
-            }
+    @CrossOrigin(origins = "http://localhost:4200")
+    @GetMapping("/list-contacts")
+    public ResponseEntity<Set<Contact>> listContacts() {
+        User currentUser = authenticatedUser.getAuthenticatedUser();
+
+        if (currentUser != null) {
+            Set<Contact> userContacts = currentUser.getContacts();
+            return ResponseEntity.ok(userContacts);
         } else {
-            return ResponseEntity.status(404).body("User not found");
+            return ResponseEntity.status(404).body(null); // Utilisateur non trouvé
         }
     }
-*/
-    /////////////////////////////////////////////////////////////////////////////////////
 
+
+    /////////////////////////////////////////////////////////////////////////////////////
     @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("/add-contact")
     public ResponseEntity<Map<String, String>> addContact(@RequestBody Contact contact) {
         User currentUser = authenticatedUser.getAuthenticatedUser();
 
         if (currentUser != null && contact != null) {
+            // Vérifier si le contact existe déjà
+            if (userService.doesContactExist(currentUser, contact)) {
+                Map<String, String> response = new HashMap<>();
+                response.put("error", "Contact already exists");
+                return ResponseEntity.status(400).body(response);
+            }
+
             contactRepository.save(contact);
 
             if (currentUser.addContact(contact)) {
-
                 userRepository.save(currentUser);
 
+                // Notify otherUser about the addition (send a notification)
                 Map<String, String> response = new HashMap<>();
                 response.put("message", "Contact added successfully");
                 return ResponseEntity.ok(response);
             } else {
                 Map<String, String> response = new HashMap<>();
                 response.put("error", "Contact already exists");
-
                 return ResponseEntity.status(400).body(response);
             }
         } else {
             Map<String, String> response = new HashMap<>();
             response.put("error", "User not found");
-
             return ResponseEntity.status(404).body(response);
         }
     }
+
 
 }
