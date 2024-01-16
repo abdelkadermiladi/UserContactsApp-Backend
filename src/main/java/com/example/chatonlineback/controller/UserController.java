@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 @RestController
@@ -159,6 +156,36 @@ public class UserController {
             return ResponseEntity.status(404).body(response);
         }
     }
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    @CrossOrigin(origins = "http://localhost:4200")
+    @DeleteMapping("/remove-contact/{contactname}")
+    public ResponseEntity<Map<String, String>> removeContact(@PathVariable String contactname) {
+        User currentUser = authenticatedUser.getAuthenticatedUser();
+
+        if (currentUser != null) {
+            Optional<Contact> contactToRemove = currentUser.getContacts().stream()
+                    .filter(contact -> contact.getContactname().equals(contactname))
+                    .findFirst();
+
+            if (contactToRemove.isPresent()) {
+                currentUser.removeContact(contactToRemove.get());
+                userRepository.save(currentUser);
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Contact removed successfully");
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, String> response = new HashMap<>();
+                response.put("error", "Contact not found");
+                return ResponseEntity.status(404).body(response);
+            }
+        } else {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "User not authenticated");
+            return ResponseEntity.status(401).body(response);
+        }
+    }
+
 
 
 }
