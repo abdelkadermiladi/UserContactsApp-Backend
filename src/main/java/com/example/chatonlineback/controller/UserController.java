@@ -6,6 +6,8 @@ import com.example.chatonlineback.service.EmailService;
 
 import com.example.chatonlineback.repository.UserRepository;
 import com.example.chatonlineback.service.UserService;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -81,7 +83,7 @@ public class UserController {
             return ResponseEntity.status(401).body(response);
         }
     }
-    /////////////////////////////////////////////////////////////////////////////////////
+
 
     @Value("${spring.mail.username}")
     private String EmailSender;
@@ -106,7 +108,7 @@ public class UserController {
             return ResponseEntity.status(404).body("Recipient not found");
         }
     }
-    /////////////////////////////////////////////////////////////////////////////////////
+
 
     @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/list-contacts")
@@ -123,6 +125,9 @@ public class UserController {
 
 
     /////////////////////////////////////////////////////////////////////////////////////
+
+    //@Value("${spring.mail.username}")
+    //private String EmailSender;
     @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("/add-contact")
     public ResponseEntity<Map<String, String>> addContact(@RequestBody Contact contact) {
@@ -135,13 +140,26 @@ public class UserController {
                 response.put("error", "Contact already exists");
                 return ResponseEntity.status(400).body(response);
             }
+            // Check if the email is valid
+            if (!isValidEmail(contact.getEmail())) {
+                Map<String, String> response = new HashMap<>();
+                response.put("error", "Invalid email address");
+                return ResponseEntity.status(400).body(response);
+            }
 
             contactRepository.save(contact);
 
             if (currentUser.addContact(contact)) {
                 userRepository.save(currentUser);
 
-                // Notify otherUser about the addition (send a notification)
+                String contactEmail = contact.getEmail();
+                String subject = "Ajout Contact";
+                String content = currentUser.getUsername()+" vous a ajouté a sa liste des contacts :\n" +
+                        "Nom: "+contact.getContactname()+"\nNuméro: "+contact.getPhoneNumber();
+
+                // Send email
+                emailService.sendEmail(EmailSender, contactEmail, subject, content);
+
                 Map<String, String> response = new HashMap<>();
                 response.put("message", "Contact added successfully");
                 return ResponseEntity.ok(response);
@@ -156,7 +174,14 @@ public class UserController {
             return ResponseEntity.status(404).body(response);
         }
     }
-
+    private boolean isValidEmail(String email) {
+        try {
+            new InternetAddress(email).validate();
+            return true;
+        } catch (AddressException ex) {
+            return false;
+        }
+    }
     /////////////////////////////////////////////////////////////////////////////////////
     @CrossOrigin(origins = "http://localhost:4200")
     @DeleteMapping("/remove-contact/{contactname}")
