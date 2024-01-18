@@ -184,13 +184,13 @@ public class UserController {
     }
     /////////////////////////////////////////////////////////////////////////////////////
     @CrossOrigin(origins = "http://localhost:4200")
-    @DeleteMapping("/remove-contact/{contactname}")
-    public ResponseEntity<Map<String, String>> removeContact(@PathVariable String contactname) {
+    @DeleteMapping("/remove-contact/{contactId}")
+    public ResponseEntity<Map<String, String>> removeContact(@PathVariable Long contactId) {
         User currentUser = authenticatedUser.getAuthenticatedUser();
 
         if (currentUser != null) {
             Optional<Contact> contactToRemove = currentUser.getContacts().stream()
-                    .filter(contact -> contact.getContactname().equals(contactname))
+                    .filter(contact -> contact.getId().equals(contactId))
                     .findFirst();
 
             if (contactToRemove.isPresent()) {
@@ -198,6 +198,45 @@ public class UserController {
                 userRepository.save(currentUser);
                 Map<String, String> response = new HashMap<>();
                 response.put("message", "Contact removed successfully");
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, String> response = new HashMap<>();
+                response.put("error", "Contact not found");
+                return ResponseEntity.status(404).body(response);
+            }
+        } else {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "User not authenticated");
+            return ResponseEntity.status(401).body(response);
+        }
+    }
+    /////////////////////////////////////////////////////////////////////////////////////
+    @CrossOrigin(origins = "http://localhost:4200")
+    @PutMapping("/update-contact/{contactId}")
+    public ResponseEntity<Map<String, String>> updateContact(
+            @PathVariable Long contactId,
+            @RequestBody Contact updatedContact
+    ) {
+        User currentUser = authenticatedUser.getAuthenticatedUser();
+
+        if (currentUser != null) {
+            Optional<Contact> contactToUpdate = currentUser.getContacts().stream()
+                    .filter(contact -> contact.getId().equals(contactId))
+                    .findFirst();
+
+            if (contactToUpdate.isPresent()) {
+                // Update the contact details
+                Contact existingContact = contactToUpdate.get();
+                existingContact.setContactname(updatedContact.getContactname());
+                existingContact.setEmail(updatedContact.getEmail());
+                existingContact.setPhoneNumber(updatedContact.getPhoneNumber());
+
+                // Save the updated contact
+                contactRepository.save(existingContact);
+                userRepository.save(currentUser);
+
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Contact updated successfully");
                 return ResponseEntity.ok(response);
             } else {
                 Map<String, String> response = new HashMap<>();
