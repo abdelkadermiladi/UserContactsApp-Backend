@@ -1,6 +1,8 @@
 package com.example.chatonlineback.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -42,6 +44,23 @@ public class User {
         contacts.remove(contact);
     }
 
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "user_notifications",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "notification_id")
+    )
+    private Set<Notification> notifications = new HashSet<>();
+
+    public Set<Notification> getNotifications() {
+        return notifications;
+    }
+    // Existing methods
+
+    @Transactional
+    public void addNotification(Notification notification) {
+        notifications.add(notification);
+    }
 
     public String getUsername() {
         return username;

@@ -2,6 +2,7 @@ package com.example.chatonlineback.controller;
 
 import com.example.chatonlineback.model.*;
 import com.example.chatonlineback.repository.ContactRepository;
+import com.example.chatonlineback.repository.NotificationRepository;
 import com.example.chatonlineback.service.EmailService;
 
 import com.example.chatonlineback.repository.UserRepository;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 
@@ -22,13 +24,16 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final ContactRepository contactRepository;
+    private final NotificationRepository notificationRepository;
     private final EmailService emailService;
     private final UserService userService;
     private final AuthenticatedUser authenticatedUser;
     @Autowired
     public UserController(UserRepository userRepository,ContactRepository contactRepository,
+                          NotificationRepository notificationRepository,
                           EmailService emailService,UserService userService) {
         this.contactRepository = contactRepository;
+        this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
         this.emailService  =emailService;
         this.userService  =userService;
@@ -48,17 +53,54 @@ public class UserController {
     @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/users/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
-
         User user = userRepository.findByUsername(username);
 
         if (user != null) {
+            userRepository.save(user);
+
+
             return ResponseEntity.ok(user);
         } else {
             // User not found
             return ResponseEntity.notFound().build();
         }
     }
+    @CrossOrigin(origins = "http://localhost:4200")
+    @PostMapping("/users/{username}")
+    public ResponseEntity<User> addNotification(@PathVariable String username) {
+        User currentuser = userRepository.findByUsername(username);
+
+        if (currentuser != null && authenticatedUser.getAuthenticatedUser() != null) {
+            Notification notification = new Notification();
+            notification.setMessage("Your profile has been viewed by " + authenticatedUser.getAuthenticatedUser().getUsername());
+            notification.setTime(LocalDateTime.now());
+            notification.setUser(currentuser);
+            currentuser.addNotification(notification);
+
+            userRepository.save(currentuser);
+            notificationRepository.save(notification);
+
+            return ResponseEntity.ok(currentuser);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     /////////////////////////////////////////////////////////////////////////////////////
+
+    @CrossOrigin(origins = "http://localhost:4200")
+    @GetMapping("/notifications")
+    public ResponseEntity<Set<Notification>> getUserNotifications() {
+        User currentUser = authenticatedUser.getAuthenticatedUser();
+
+        if (currentUser != null) {
+            Set<Notification> notifications = currentUser.getNotifications();
+            return ResponseEntity.ok(notifications);
+        } else {
+            return ResponseEntity.status(401).body(null); // User not authenticated
+        }
+    }
+
 
     @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("/login")
