@@ -31,5 +31,4 @@ public class EmailRequest {
         this.content = content;
     }
 
-    // Getters and setters
 }

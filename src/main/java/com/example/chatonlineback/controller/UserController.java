@@ -4,7 +4,6 @@ import com.example.chatonlineback.model.*;
 import com.example.chatonlineback.repository.ContactRepository;
 import com.example.chatonlineback.repository.NotificationRepository;
 import com.example.chatonlineback.service.EmailService;
-
 import com.example.chatonlineback.repository.UserRepository;
 import com.example.chatonlineback.service.UserService;
 import jakarta.mail.internet.AddressException;
@@ -13,10 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.*;
-
 
 @RestController
 @RequestMapping("/api")
@@ -57,8 +54,6 @@ public class UserController {
 
         if (user != null) {
             userRepository.save(user);
-
-
             return ResponseEntity.ok(user);
         } else {
             // User not found
@@ -125,33 +120,7 @@ public class UserController {
             return ResponseEntity.status(401).body(response);
         }
     }
-
-
-    @Value("${spring.mail.username}")
-    private String EmailSender;
-    @CrossOrigin(origins = "http://localhost:4200")
-    @PostMapping("/send-email")
-    public ResponseEntity<String> sendEmail(@RequestBody EmailRequest emailRequest) {
-        // Extract recipient, subject, and content from the request
-        String recipientUsername = emailRequest.getRecipientUsername();
-        String subject = emailRequest.getSubject();
-        String content = emailRequest.getContent();
-
-        // Fetch sender and recipient details from the database
-        User recipient = userRepository.findByUsername(recipientUsername);
-
-        if (recipient != null) {
-            // Send email
-            emailService.sendEmail(EmailSender, recipient.getEmail(), subject, content);
-
-            return ResponseEntity.ok("Email sent successfully");
-        } else {
-            // recipient not found
-            return ResponseEntity.status(404).body("Recipient not found");
-        }
-    }
-
-
+    /////////////////////////////////////////////////////////////////////////////////////
     @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/list-contacts")
     public ResponseEntity<Set<Contact>> listContacts() {
@@ -161,15 +130,15 @@ public class UserController {
             Set<Contact> userContacts = currentUser.getContacts();
             return ResponseEntity.ok(userContacts);
         } else {
-            return ResponseEntity.status(404).body(null); // Utilisateur non trouvé
+            return ResponseEntity.status(404).body(null);
         }
     }
 
 
     /////////////////////////////////////////////////////////////////////////////////////
 
-    //@Value("${spring.mail.username}")
-    //private String EmailSender;
+    @Value("${spring.mail.username}")
+    private String EmailSender;
     @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("/add-contact")
     public ResponseEntity<Map<String, String>> addContact(@RequestBody Contact contact) {
@@ -292,6 +261,5 @@ public class UserController {
         }
     }
 
-
-
+    /////////////////////////////////////////////////////////////////////////////////////
 }

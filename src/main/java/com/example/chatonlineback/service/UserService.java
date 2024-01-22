@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     public boolean doesContactExist(User currentUser, Contact contact) {
-        // Vérifier si le contact existe déjà pour l'utilisateur
         return currentUser.getContacts().stream()
                 .anyMatch(existingContact ->
                         existingContact.getContactname().equals(contact.getContactname())

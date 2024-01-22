@@ -51,5 +51,4 @@ public class Notification {
         this.id = id;
     }
 
-    // Constructors, getters, and setters
 }
