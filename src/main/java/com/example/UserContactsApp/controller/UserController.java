@@ -1,11 +1,11 @@
-package com.example.chatonlineback.controller;
+package com.example.UserContactsApp.controller;
 
-import com.example.chatonlineback.model.*;
-import com.example.chatonlineback.repository.ContactRepository;
-import com.example.chatonlineback.repository.NotificationRepository;
-import com.example.chatonlineback.service.EmailService;
-import com.example.chatonlineback.repository.UserRepository;
-import com.example.chatonlineback.service.UserService;
+import com.example.UserContactsApp.model.*;
+import com.example.UserContactsApp.repository.ContactRepository;
+import com.example.UserContactsApp.repository.NotificationRepository;
+import com.example.UserContactsApp.service.EmailService;
+import com.example.UserContactsApp.repository.UserRepository;
+import com.example.UserContactsApp.service.UserService;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import org.springframework.beans.factory.annotation.Autowired;

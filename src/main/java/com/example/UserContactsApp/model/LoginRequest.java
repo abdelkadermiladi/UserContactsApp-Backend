@@ -1,4 +1,4 @@
-package com.example.chatonlineback.model;
+package com.example.UserContactsApp.model;
 
 public class LoginRequest {
     private String username;

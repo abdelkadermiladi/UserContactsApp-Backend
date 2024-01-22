@@ -1,7 +1,7 @@
-package com.example.chatonlineback.service;
+package com.example.UserContactsApp.service;
 
-import com.example.chatonlineback.model.Contact;
-import com.example.chatonlineback.model.User;
+import com.example.UserContactsApp.model.Contact;
+import com.example.UserContactsApp.model.User;
 import org.springframework.stereotype.Service;
 
 @Service

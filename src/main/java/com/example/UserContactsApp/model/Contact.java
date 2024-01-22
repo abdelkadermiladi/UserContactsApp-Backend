@@ -1,5 +1,5 @@
 
-package com.example.chatonlineback.model;
+package com.example.UserContactsApp.model;
 
 import jakarta.persistence.*;
 

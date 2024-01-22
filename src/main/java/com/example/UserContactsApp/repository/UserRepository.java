@@ -1,6 +1,6 @@
-package com.example.chatonlineback.repository;
+package com.example.UserContactsApp.repository;
 
-import com.example.chatonlineback.model.User;
+import com.example.UserContactsApp.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

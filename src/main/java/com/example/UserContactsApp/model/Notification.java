@@ -1,4 +1,4 @@
-package com.example.chatonlineback.model;
+package com.example.UserContactsApp.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
