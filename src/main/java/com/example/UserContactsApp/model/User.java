@@ -28,6 +28,7 @@ public class User {
     private Set<Contact> contacts = new HashSet<>();
 
 
+
     public Set<Contact> getContacts() {
         return contacts;
     }

@@ -10,6 +10,7 @@ import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
@@ -119,6 +120,41 @@ public class UserController {
             response.put("message", "Invalid credentials");
             return ResponseEntity.status(401).body(response);
         }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    @CrossOrigin(origins = "http://localhost:4200")
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody RegistrationRequest registrationRequest) {
+        // Extract registration details from the request
+        String username = registrationRequest.getUsername();
+        String password = registrationRequest.getPassword();
+        int age = registrationRequest.getAge();
+        String gender = registrationRequest.getGender();
+        String email = registrationRequest.getEmail();
+        int phoneNumber = registrationRequest.getPhone_number();
+
+        // Check if the username is already taken
+        if (userRepository.existsByUsername(username)) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Username already exists");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+        // Create a new user
+        User newUser = new User();
+        newUser.setUsername(username);
+        newUser.setPassword(password);
+        newUser.setAge(age);
+        newUser.setGender(gender);
+        newUser.setPhoneNumber(phoneNumber);
+        newUser.setEmail(email);
+
+        // Save the user to the database
+        userRepository.save(newUser);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Registration successful");
+        return ResponseEntity.ok(response);
     }
     /////////////////////////////////////////////////////////////////////////////////////
     @CrossOrigin(origins = "http://localhost:4200")
