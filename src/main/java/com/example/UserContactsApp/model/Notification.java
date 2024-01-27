@@ -15,7 +15,7 @@ public class Notification {
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnore  // Add this annotation to break the loop
-    private User user; // User who triggered the action
+    private ApplicationUser user; // User who triggered the action
 
     private String message; // Notification message
     private LocalDateTime time; // Timestamp of the action
@@ -35,11 +35,11 @@ public class Notification {
         this.time = time;
     }
 
-    public User getUser() {
+    public ApplicationUser getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(ApplicationUser user) {
         this.user = user;
     }
 
@@ -51,4 +51,13 @@ public class Notification {
         this.id = id;
     }
 
+    @Override
+    public String toString() {
+        return "Notification{" +
+                "id=" + id +
+                ", user=" + user +
+                ", message='" + message + '\'' +
+                ", time=" + time +
+                '}';
+    }
 }

@@ -8,6 +8,20 @@ public class RegistrationRequest {
     private String email;
     private int phone_number;
 
+    public RegistrationRequest(){
+        super();
+    }
+
+    public RegistrationRequest(String username, String password, int age, String gender, String email, int phone_number) {
+        super();
+        this.username = username;
+        this.password = password;
+        this.age = age;
+        this.gender = gender;
+        this.email = email;
+        this.phone_number = phone_number;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -55,5 +69,17 @@ public class RegistrationRequest {
 
     public void setPhone_number(int phone_number) {
         this.phone_number = phone_number;
+    }
+
+    @Override
+    public String toString() {
+        return "RegistrationRequest{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", age=" + age +
+                ", gender='" + gender + '\'' +
+                ", email='" + email + '\'' +
+                ", phone_number=" + phone_number +
+                '}';
     }
 }
